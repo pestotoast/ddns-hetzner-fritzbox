@@ -1,0 +1,13 @@
+version: '3'
+services:
+  ddns:
+    build: ./
+    restart: always
+    volumes:
+      - ./ddns.py:/ddns.py
+      - ./data.json:/data.json
+    environment:
+      - FRITZ_BOX_IP=$FRITZ_BOX_IP
+      - HETZNER_API_TOKEN=$HETZNER_API_TOKEN
+      - DOMAIN_1=$DOMAIN_1
+      - DOMAIN_2=$DOMAIN_2

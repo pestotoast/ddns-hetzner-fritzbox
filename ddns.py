@@ -20,7 +20,7 @@ def getIPv6():
     data = '<?xml version=\"1.0\" encoding=\"utf-8\"?><s:Envelope xmlns:s=\"http://schemas.xmlsoap.org/soap/envelope/\" s:encodingStyle=\"http://schemas.xmlsoap.org/soap/encoding/\"> <s:Body> <u:X_AVM_DE_GetIPv6Prefix xmlns:u=\"urn:schemas-upnp-org:service:WANIPConnection:1\" /></s:Body></s:Envelope>'
     response = requests.post(url, data=data, headers=headers)
     xml = ET.fromstring(response.text)
-    return xml[0][0][0].text + "2"
+    return xml[0][0][0].text + ipv6_suffix
 
 def updateIPv4(input):
     url = 'https://dns.hetzner.com/api/v1/records/' + input["recordId_v4"]
@@ -42,10 +42,10 @@ domain_1 = os.getenv("DOMAIN_1")
 domain_2 = os.getenv("DOMAIN_2")
 domain_1 = json.loads(domain_1)
 domain_2 = json.loads(domain_2)
+ipv6_suffix = os.getenv("IPv6_SUFFIX")
 
 dictionary = { 'ip4':'', 'ip6':'' }
 
-print(json.dumps(dictionary))
 while 1==1:
     ip4 = getIPv4()
     ip6 = getIPv6()
@@ -58,6 +58,7 @@ while 1==1:
     domain_2["token"] = token
     
     if ip4 != dictionary["ip4"] or ip6 != dictionary["ip6"]:
+        print('###########################')
         print(datetime.datetime.now())
         try:
           updateIPv4(domain_1)
@@ -70,4 +71,5 @@ while 1==1:
           dictionary["ip4"] = ''
           dictionary["ip6"] = ''
         print(json.dumps(dictionary))
+        print('###########################')
     time.sleep(60)

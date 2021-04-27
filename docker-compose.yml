@@ -11,3 +11,4 @@ services:
       - HETZNER_API_TOKEN=$HETZNER_API_TOKEN
       - DOMAIN_1=$DOMAIN_1
       - DOMAIN_2=$DOMAIN_2
+      - IPv6_SUFFIX=$IPv6_SUFFIX

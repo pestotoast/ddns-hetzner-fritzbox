@@ -25,14 +25,14 @@ def getIPv6():
 def updateIPv4(input):
     url = 'https://dns.hetzner.com/api/v1/records/' + input["recordId_v4"]
     headers = { 'Content-Type': 'application/json', 'Auth-API-Token': input["token"]}
-    data = { 'value': input["ip4"], 'ttl': 60, 'type': 'A', 'name': '@', 'zone_id': input["zoneId"]}
+    data = { 'value': input["ip4"], 'ttl': 60, 'type': 'A', 'name': input["name"], 'zone_id': input["zoneId"]}
     respone = requests.put(url, data=json.dumps(data), headers=headers)
     print(respone.text)
 
 def updateIPv6(input):
     url = 'https://dns.hetzner.com/api/v1/records/' + input["recordId_v6"]
     headers = { 'Content-Type': 'application/json', 'Auth-API-Token': input["token"]}
-    data = { 'value': input["ip6"], 'ttl': 60, 'type': 'AAAA', 'name': '@', 'zone_id': input["zoneId"]}
+    data = { 'value': input["ip6"], 'ttl': 60, 'type': 'AAAA', 'name': input["name"], 'zone_id': input["zoneId"]}
     respone = requests.put(url, data=json.dumps(data), headers=headers)
     print(respone.text)
 
@@ -67,7 +67,8 @@ while 1==1:
           updateIPv6(domain_2)
           dictionary["ip4"] = ip4
           dictionary["ip6"] = ip6
-        except:
+        except Exception as e:
+          print(e)
           dictionary["ip4"] = ''
           dictionary["ip6"] = ''
         print(json.dumps(dictionary))

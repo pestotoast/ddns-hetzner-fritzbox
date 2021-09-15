@@ -46,7 +46,7 @@ ipv6_suffix = os.getenv("IPv6_SUFFIX")
 
 dictionary = { 'ip4':'', 'ip6':'' }
 
-while 1==1:
+while True:
     ip4 = getIPv4()
     ip6 = getIPv6()
     domain_1["ip4"] = ip4
@@ -61,16 +61,18 @@ while 1==1:
         print('###########################')
         print(datetime.datetime.now())
         try:
-          updateIPv4(domain_1)
-          updateIPv6(domain_1)
-          updateIPv4(domain_2)
-          updateIPv6(domain_2)
+          if ip4 != dictionary["ip4"]:
+            updateIPv4(domain_1)
+            updateIPv4(domain_2)
+          if ip6 != dictionary["ip6"]:
+            updateIPv6(domain_1)
+            updateIPv6(domain_2)
           dictionary["ip4"] = ip4
           dictionary["ip6"] = ip6
         except Exception as e:
           print(e)
           dictionary["ip4"] = ''
           dictionary["ip6"] = ''
-        print(json.dumps(dictionary))
         print('###########################')
+        
     time.sleep(60)

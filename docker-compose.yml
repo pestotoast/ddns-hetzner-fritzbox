@@ -5,7 +5,6 @@ services:
     restart: always
     volumes:
       - ./ddns.py:/ddns.py
-      - ./data.json:/data.json
     environment:
       - FRITZ_BOX_IP=$FRITZ_BOX_IP
       - HETZNER_API_TOKEN=$HETZNER_API_TOKEN

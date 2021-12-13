@@ -1,5 +1,0 @@
-FRITZ_BOX_IP=192.168.178.1
-HETZNER_API_TOKEN=xxxx
-DOMAIN_1={ "recordId_v4":"xxxx", "recordId_v6": "xxxx", "zoneId": "xxxx" }
-DOMAIN_2={ "recordId_v4":"xxxx", "recordId_v6": "xxxx", "zoneId": "xxxx" }
-IPv6_SUFFIX=123:123:123

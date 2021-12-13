@@ -1,0 +1,10 @@
+domain_name: required
+api_token: required
+
+## default configuration:
+#ttl: 60
+#ip_check_interval: 60
+## Instead of asking external services for our public ip we ask our router
+#fritzbox_ip: 192.168.178.1
+## leave this empty if you dont care about IPv6:
+#ipv6_interface_id: ::dead:beef

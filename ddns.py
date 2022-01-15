@@ -118,16 +118,14 @@ def getSubdomain(domain_name):
       return '.'.join(strings)
     return strings[0]
 
-def log(text, newline = True):
-  if newline:
+def log(text):
     date = str(datetime.datetime.now())
-    text = date + " | " +text
+    text = date + " | " +text    
     print(text)
-  else:
-    print(text, end ="")
 
 def updateLoop(conf, record_v4, record_v6):
-  log("Starting update check, running every " + str(conf['ip_check_interval']) + " seconds..")
+  log("Starting update check, checking fritzbox status every " + str(conf['ip_check_interval']) + " seconds..")
+  log("Checking Hetzner status every " + str(10 * conf['ip_check_interval']) + " seconds..")
   ip4=old_ip4=ip6=old_ip6=''
   counter=0
   if record_v4:
@@ -136,7 +134,7 @@ def updateLoop(conf, record_v4, record_v6):
     ip6=old_ip6=record_v6['value']
   while True:    
     if counter % 10 == 0:
-      log("Comparing records at hetzner.. ", False)
+      log("Comparing records at hetzner.. ")
       old_ip4 = getRecord(record_v4['type'], record_v4['name'], record_v4['zone_id'], conf['api_token'])['value']
       if not record_v6 is None:
         old_ip6 = getRecord(record_v6['type'], record_v6['name'], record_v6['zone_id'], conf['api_token'])['value']

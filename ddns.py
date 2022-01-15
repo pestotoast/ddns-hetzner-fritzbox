@@ -33,7 +33,7 @@ def updateRecord(ip_address, ttl, record, api_token):
             'name': record['name'], 
             'zone_id': record['zone_id']}
   respone = requests.put(url, data=json.dumps(data), headers=headers)
-  print(respone.text)
+  log(respone.text)
 
 def getRecord(record_type, record_name, zone_id, api_token):
   response = requests.get(
@@ -85,10 +85,10 @@ def loadConfig(path):
       conf = yaml.safe_load(ymlfile)
       ymlfile.close()
     if not 'domain_name' in conf or conf['domain_name'] == '':
-      print("Please add your 'domain_name' to the configuration file")
+      log("Please add your 'domain_name' to the configuration file")
       exit(1)
     if not 'api_token' in conf or conf['api_token'] == '':
-      print("Please add your 'api_token' to the configuration file. You can create it at https://dns.hetzner.com/settings/api-token")
+      log("Please add your 'api_token' to the configuration file. You can create it at https://dns.hetzner.com/settings/api-token")
       exit(1)
     if not 'ttl' in conf or conf['ttl'] == '':
       conf['ttl'] = 60
@@ -100,7 +100,7 @@ def loadConfig(path):
       conf['ipv6_interface_id'] = "disabled"
     return conf
   except FileNotFoundError:
-    print("No such file or directory: " + path)
+    log("No such file or directory: " + path)
     exit(1)
 
 def getSubdomain(domain_name):
@@ -118,8 +118,16 @@ def getSubdomain(domain_name):
       return '.'.join(strings)
     return strings[0]
 
+def log(text, newline = True):
+  if newline:
+    date = str(datetime.datetime.now())
+    text = date + " | " +text
+    print(text)
+  else:
+    print(text, end ="")
+
 def updateLoop(conf, record_v4, record_v6):
-  print("Starting update check, running every " + str(conf['ip_check_interval']) + " seconds..")
+  log("Starting update check, running every " + str(conf['ip_check_interval']) + " seconds..")
   ip4=old_ip4=ip6=old_ip6=''
   counter=0
   if record_v4:
@@ -128,21 +136,20 @@ def updateLoop(conf, record_v4, record_v6):
     ip6=old_ip6=record_v6['value']
   while True:    
     if counter % 10 == 0:
-      print("Comparing records at hetzner.. ", end ="")
+      log("Comparing records at hetzner.. ", False)
       old_ip4 = getRecord(record_v4['type'], record_v4['name'], record_v4['zone_id'], conf['api_token'])['value']
       if not record_v6 is None:
         old_ip6 = getRecord(record_v6['type'], record_v6['name'], record_v6['zone_id'], conf['api_token'])['value']
       if ip4 == old_ip4 or ip6 == old_ip6:
-        print("Everything up-to-date :)")
+        log("Everything up-to-date :)")
   
     ip4 = getIPv4(conf['fritzbox_ip'])
     if conf['ipv6_interface_id'] != 'disabled':
       ip6 = getIPv6(conf['fritzbox_ip'], conf['ipv6_interface_id'])      
     if ip4 != old_ip4 or ip6 != old_ip6:
-        print('###########################')
-        print(datetime.datetime.now())
-        print(ip6)
-        print(old_ip6)
+        log('###########################')
+        log("old: " + old_ip6)
+        log("new: " + ip6)
         try:
           if ip4 != old_ip4:
             updateRecord(ip4, conf['ttl'], record_v4, conf['api_token'])
@@ -151,16 +158,16 @@ def updateLoop(conf, record_v4, record_v6):
             updateRecord(ip6, conf['ttl'], record_v6, conf['api_token'])
             old_ip6 = ip6
         except Exception as e:
-          print(e)
+          log(e)
           old_ip4=''
           old_ip6=''
-        print('###########################')          
+        log('###########################')          
     time.sleep(conf['ip_check_interval'])
     counter=counter+1
 
 def init(conf):
   zone = getZone(conf['domain_name'], conf['api_token'])
-  print("Found existing zone " + zone['id'] +" for domain: " + zone['name'] )
+  log("Found existing zone " + zone['id'] +" for domain: " + zone['name'] )
   record_name = getSubdomain(conf['domain_name'])
   record_v4 = getRecord('A', record_name, zone['id'], conf['api_token'])
   if not record_v4:
@@ -170,9 +177,9 @@ def init(conf):
                               record_name, 
                               zone['id'], 
                               conf['api_token'])
-    print("Added missing record: " + str(record_v4))
+    log("Added missing record: " + str(record_v4))
   else:
-    print("Found existing A-record " + record_v4['id'] + " for: " + conf['domain_name'])
+    log("Found existing A-record " + record_v4['id'] + " for: " + conf['domain_name'])
   record_v6=None
   if conf['ipv6_interface_id'] != 'disabled':
     record_v6 = getRecord('AAAA', record_name, zone['id'], conf['api_token'])
@@ -183,22 +190,22 @@ def init(conf):
                                 record_name, 
                                 zone['id'], 
                                 conf['api_token'])
-      print("Added missing record: " + str(record_v6))
+      log("Added missing record: " + str(record_v6))
     else:
-      print("Found existing AAAA-record " + record_v6['id'] + " for: " + conf['domain_name'])
+      log("Found existing AAAA-record " + record_v6['id'] + " for: " + conf['domain_name'])
   else:
-    print("Skipping IPv6 related tasks. 'ipv6_interface_id' is not set.")
+    log("Skipping IPv6 related tasks. 'ipv6_interface_id' is not set.")
   return record_v4, record_v6
 
 def main():
   try:
     conf = loadConfig(sys.argv[2])
   except IndexError:
-    print("""
+    log("""
       Usage: ./dyndns -c config.yml
     """)
     exit(1)
-  print("Started DynDNS Client")
+  log("Started DynDNS Client")
   record_v4, record_v6 = init(conf)
   updateLoop(conf, record_v4, record_v6)
 

@@ -13,6 +13,9 @@ def getIPv4(fritzbox_ip):
   data = '<?xml version=\"1.0\" encoding=\"utf-8\"?><s:Envelope xmlns:s=\"http://schemas.xmlsoap.org/soap/envelope/\" s:encodingStyle=\"http://schemas.xmlsoap.org/soap/encoding/\"> <s:Body> <u:GetExternalIPAddress xmlns:u=\"urn:schemas-upnp-org:service:WANIPConnection:1\" /></s:Body></s:Envelope>'
   response = requests.post(url, data=data, headers=headers)
   xml = ET.fromstring(response.text)
+  if xml[0][0][0].text == 's:Client':
+    log('Failed to get public IPv4. Is UPnP enabled on your FritzBox?')
+    return None
   return xml[0][0][0].text
 
 def getIPv6(fritzbox_ip, ipv6_interface_id):
@@ -22,6 +25,9 @@ def getIPv6(fritzbox_ip, ipv6_interface_id):
   response = requests.post(url, data=data, headers=headers)
   xml = ET.fromstring(response.text)
   interface = ipv6_interface_id.replace('::', '')
+  if xml[0][0][0].text == 's:Client':
+    log('Failed to get public IPv6. Is UPnP enabled on your FritzBox?')
+    return None
   return xml[0][0][0].text + interface
 
 def updateRecord(ip_address, ttl, record, api_token):
@@ -144,7 +150,7 @@ def updateLoop(conf, record_v4, record_v6):
     ip4 = getIPv4(conf['fritzbox_ip'])
     if conf['ipv6_interface_id'] != 'disabled':
       ip6 = getIPv6(conf['fritzbox_ip'], conf['ipv6_interface_id'])      
-    if ip4 != old_ip4 or ip6 != old_ip6:
+    if (ip4 != old_ip4 and ip4 is not None) or (ip6 != old_ip6 and ip6 is not None):
         log('###########################')
         log("old: " + old_ip6)
         log("new: " + ip6)
